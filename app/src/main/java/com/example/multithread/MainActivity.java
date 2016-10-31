@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,11 +64,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             Integer i = 0;
-         //   Toast.makeText(MainActivity.this, "Error reading file!", Toast.LENGTH_SHORT).show();
+            //   Toast.makeText(MainActivity.this, "Error reading file!", Toast.LENGTH_SHORT).show();
+
             while (scan.hasNext()) {
                 String j = scan.next();
-                adpt.add(j);
                 i++;
+                try {
+                    Thread.sleep(250);
+                }
+                catch (InterruptedException e) {
+                }
                 publishProgress(i);
             }
             return null;
@@ -75,15 +81,72 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(Integer... values) {
+            adpt.setNotifyOnChange(false);
+            adpt.add(values[0].toString());
             adpt.notifyDataSetChanged();
+            ProgressBar progBar = (ProgressBar) findViewById(R.id.progressBar);
+            progBar.setProgress(values[0] * 10);
         }
 
         @Override
         protected void onPostExecute(Void result) {
             scan.close();
+            adpt.notifyDataSetChanged();
+            ProgressBar progBar = (ProgressBar) findViewById(R.id.progressBar);
+            progBar.setProgress(0);
         }
 
 
+    }
+
+    class Write extends AsyncTask<Void, Integer, Void> {
+
+
+
+        Write() {
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                FileOutputStream FIO = openFileOutput("numbers.txt", MODE_PRIVATE);
+                for(int i = 1; i < 11; i++ ) {
+                    String myVal = Integer.toString(i) + "\n";
+                    FIO.write(myVal.getBytes());
+                    try {
+                        Thread.sleep(250);
+                    }
+                    catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    publishProgress(i);
+                }
+                FIO.close();
+            }
+            catch (IOException i) {
+                Toast.makeText(MainActivity.this, "Error reading file!", Toast.LENGTH_SHORT).show();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            ProgressBar progBar = (ProgressBar) findViewById(R.id.progressBar);
+            progBar.setProgress(values[0] * 10);
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            ProgressBar progBar = (ProgressBar) findViewById(R.id.progressBar);
+            progBar.setProgress(0);
+        }
     }
 
 
@@ -103,21 +166,13 @@ public class MainActivity extends AppCompatActivity {
         create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    FileOutputStream FIO = openFileOutput("numbers.txt", MODE_PRIVATE);
-                    for(int i = 1; i < 11; i++ ) {
-                        String myVal = Integer.toString(i) + "\n";
-                        FIO.write(myVal.getBytes());
-                        Thread.sleep(250);
-                    }
-                   FIO.close();
-                }
-                catch (IOException i) {
-                    Toast.makeText(MainActivity.this, "Error reading file!", Toast.LENGTH_SHORT).show();
-                }
-                catch (InterruptedException e) {
-                    Toast.makeText(MainActivity.this, "Interruption", Toast.LENGTH_SHORT).show();
-                }
+
+                Write w = new Write();
+                w.execute();
+
+          //      catch (InterruptedException e) {
+            //        Toast.makeText(MainActivity.this, "Interruption", Toast.LENGTH_SHORT).show();
+             //   }
             }
         });
 
@@ -166,7 +221,9 @@ public class MainActivity extends AppCompatActivity {
         clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.clear();
+                if (adapter != null) {
+                    adapter.clear();
+                }
             }
         });
 
