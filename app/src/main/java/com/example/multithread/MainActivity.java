@@ -64,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             Integer i = 0;
-            //   Toast.makeText(MainActivity.this, "Error reading file!", Toast.LENGTH_SHORT).show();
-
             while (scan.hasNext()) {
                 String j = scan.next();
                 i++;
@@ -156,8 +154,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        final Context hamburger = this;
+        final Context myContext = this;
 
         create = (Button) findViewById(R.id.create);
         load = (Button) findViewById(R.id.load);
@@ -166,13 +163,8 @@ public class MainActivity extends AppCompatActivity {
         create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Write w = new Write();
                 w.execute();
-
-          //      catch (InterruptedException e) {
-            //        Toast.makeText(MainActivity.this, "Interruption", Toast.LENGTH_SHORT).show();
-             //   }
             }
         });
 
@@ -188,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                     List myValues = new  ArrayList<String>();
 
                     adapter = new ArrayAdapter<String>(
-                            hamburger,
+                            myContext,
                             R.layout.item,
                             myValues
                     );
